@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="WWA">
+<meta name="theme-color" content="#FFE6F0">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<title>WWA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chewy&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F5F7;--card:#FFFFFF;--ink:#16181D;--muted:#5B6170;--faint:#8A8F9C;--line:#E3E5EA;--line2:#EDEEF2}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{touch-action:manipulation}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif}
+body{min-height:100vh;overscroll-behavior-y:none;-webkit-user-select:none;user-select:none}
+input{-webkit-user-select:text;user-select:text}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid #2F6FEB;outline-offset:2px}
+
+.screen{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 170px)}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:0 6px}
+.head-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.kicker{font-size:14px;font-weight:600;color:var(--muted)}
+.title{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:2px 0 0;line-height:1.1}
+.pill{background:#fff;border:none;border-radius:999px;padding:8px 12px;font-size:14px;font-weight:700;white-space:nowrap;min-height:36px}
+.bar{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin:14px 6px 0}
+.bar>i{display:block;height:100%;background:var(--ink);border-radius:999px;transition:width .3s}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 6px 0}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.dot{width:8px;height:8px;border-radius:999px;flex-shrink:0}
+
+.week{display:grid;grid-template-columns:40px repeat(7,minmax(0,1fr)) 40px;align-items:center;margin-top:16px;background:#fff;border-radius:20px;padding:6px 2px}
+.navbtn{width:44px;height:44px;border:none;background:transparent;border-radius:999px;display:flex;align-items:center;justify-content:center;justify-self:center}
+.navbtn.solid{background:#fff}
+.day{border:none;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;min-height:58px}
+.day .l{font-size:11px;font-weight:700;color:var(--muted)}
+.day .n{width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.day.past .n{color:var(--faint)}
+.day.today .n{box-shadow:inset 0 0 0 2px var(--ink)}
+.day.sel .n{background:var(--ink);color:#fff;box-shadow:none}
+.dots{display:flex;gap:3px;height:6px}
+.dots i{width:6px;height:6px;border-radius:999px}
+.dots.faded{opacity:.4}
+
+.section{margin-top:22px;display:flex;flex-direction:column;gap:8px}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;padding:0 6px}
+.sec-head h2{margin:0;font-size:17px;font-weight:800}
+.sec-head span{font-size:13px;font-weight:700;color:var(--muted)}
+.row{display:flex;align-items:center;gap:2px;background:#fff;border-radius:18px;padding:6px 8px 6px 6px}
+.check{width:44px;height:44px;flex-shrink:0;border:none;background:transparent;display:flex;align-items:center;justify-content:center;padding:0}
+.check span{width:26px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;border:2.5px solid var(--c);transition:background .15s,transform .15s}
+.check.on span{background:var(--c)}
+.check:active span{transform:scale(.86)}
+.row-main{flex:1;min-width:0;border:none;background:transparent;text-align:left;padding:8px 6px;display:flex;flex-direction:column;gap:5px}
+.row-title{font-size:15px;font-weight:700;overflow-wrap:anywhere}
+.row.done .row-title{color:var(--faint);text-decoration:line-through}
+.meta{display:flex;align-items:center;gap:8px}
+.tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px}
+.time{font-size:12px;font-weight:600;color:var(--muted)}
+.empty{background:#fff;border-radius:18px;padding:18px;color:var(--muted);font-size:14px;font-weight:600;line-height:1.5}
+.empty.small{padding:14px 16px}
+
+.cal{background:#fff;border-radius:22px;padding:14px 8px 10px;margin-top:18px}
+.cal-h,.cal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.cal-h{font-size:11px;font-weight:700;color:#6B7180;text-align:center}
+.cal-g{row-gap:4px;margin-top:6px}
+
+.card{background:#fff;border-radius:22px;padding:16px 18px;margin-top:14px;display:flex;flex-direction:column;gap:12px}
+.card-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.card-top b{font-size:17px;font-weight:800}
+.card-top span{font-size:13px;font-weight:700;color:var(--muted)}
+.card .bar{margin:0}
+.card .chips{margin:0}
+
+.btn{min-height:52px;border-radius:16px;border:none;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;text-decoration:none;color:var(--ink)}
+.btn.dark{background:var(--ink);color:#fff}
+.btn.soft{background:var(--bg)}
+.btn.white{background:#fff}
+.btn.ghost{background:transparent;border:2px dashed #B9BDC7;margin-top:14px}
+.btn.danger{background:transparent;color:#B42318}
+
+.list{background:#fff;border-radius:22px;margin-top:18px;overflow:hidden}
+.co-row{display:flex;align-items:center;gap:14px;min-height:68px;padding:0 16px;border:none;background:transparent;width:100%;text-align:left;border-bottom:1px solid var(--line2)}
+.co-row:last-child{border-bottom:none}
+.sw{width:38px;height:38px;border-radius:12px;flex-shrink:0}
+.co-text{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.co-text b{font-size:16px;font-weight:800;overflow-wrap:anywhere}
+.co-text span{font-size:13px;font-weight:600;color:var(--muted)}
+.note{font-size:13px;color:var(--muted);line-height:1.5;font-weight:600;margin:0}
+
+.fab{position:fixed;right:max(20px,calc(50% - 260px));bottom:calc(env(safe-area-inset-bottom) + 86px);width:58px;height:58px;border-radius:999px;background:var(--ink);border:none;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(22,24,29,.25);z-index:5}
+.fab[hidden]{display:none}
+.tabbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 0 calc(env(safe-area-inset-bottom) + 6px);z-index:5}
+.tab{border:none;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:72px;min-height:44px;font-size:11px;font-weight:700;color:#6B7180}
+.tab.on{color:var(--ink);font-weight:800}
+
+.overlay{position:fixed;inset:0;background:rgba(22,24,29,.35);z-index:20;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s}
+.sheet{background:var(--bg);width:100%;max-width:560px;border-radius:26px 26px 0 0;padding:10px 18px calc(env(safe-area-inset-bottom) + 20px);max-height:92vh;overflow-y:auto;animation:up .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;gap:16px}
+.overlay.still,.overlay.still .sheet{animation:none}
+.grab{width:40px;height:5px;border-radius:9px;background:#C9CCD3;margin:0 auto}
+.sheet-head{display:grid;grid-template-columns:80px 1fr 80px;align-items:center}
+.sheet-head h2{margin:0;font-size:17px;font-weight:800;text-align:center}
+.link{border:none;background:transparent;font-size:15px;font-weight:700;color:var(--muted);padding:10px 4px;min-height:44px;text-align:left}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--line);border-radius:14px;padding:4px}
+.seg button{height:44px;border:none;border-radius:11px;background:transparent;font-size:15px;font-weight:800;color:var(--muted)}
+.seg button.on{background:#fff;color:var(--ink)}
+.field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.flabel{font-size:14px;font-weight:700;color:var(--muted);padding:0 4px}
+.input{height:54px;border:none;border-radius:16px;background:#fff;padding:0 16px;font-size:16px;font-weight:600;width:100%;min-width:0;-webkit-appearance:none;appearance:none;display:flex;align-items:center}
+.input::placeholder{color:var(--faint)}
+.err{color:#B42318;font-size:13px;font-weight:700;padding:0 4px;margin:0}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.co-pick{min-height:52px;border:none;border-radius:16px;background:#fff;display:flex;align-items:center;gap:10px;padding:8px 14px;font-size:15px;font-weight:700;text-align:left}
+.co-pick .dot{width:14px;height:14px}
+.palette{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.palette button{height:44px;border-radius:12px;border:none}
+.palette button.on{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--ink)}
+.preview{display:flex;align-items:center;gap:8px}
+
+.home{min-height:100vh;max-width:560px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:24px;padding:calc(env(safe-area-inset-top) + 40px) 24px calc(env(safe-area-inset-bottom) + 18px);text-align:center;color:#5A1838}
+html.home-mode,body.home-mode{background:#FFE6F0}
+body.home-mode .tabbar,body.home-mode .fab{display:none}
+.brand{font-family:'Chewy','Plus Jakarta Sans',cursive;font-size:96px;font-weight:400;line-height:1;margin:0;display:flex;justify-content:center;gap:4px;letter-spacing:.02em}
+.brand span{display:inline-block;animation:hop 2.6s ease-in-out infinite;text-shadow:0 5px 0 #FFB3D1}
+.brand span:nth-child(1){color:#FF4F9A}
+.brand span:nth-child(2){color:#E0337E;animation-delay:.18s}
+.brand span:nth-child(3){color:#FF7EB6;animation-delay:.36s}
+@keyframes hop{0%,55%,100%{transform:translateY(0) rotate(0)}15%{transform:translateY(-18px) rotate(-8deg) scale(1.05)}30%{transform:translateY(0) rotate(6deg)}42%{transform:translateY(-5px) rotate(-3deg)}}
+.brand-sub{font-family:'Chewy','Plus Jakarta Sans',cursive;font-size:22px;color:#C2185B;margin-top:6px;letter-spacing:.03em}
+.today-line{display:inline-block;margin-top:16px;background:#fff;color:#9C1B55;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700;box-shadow:0 3px 0 #FFC2DA}
+.quote-box{background:#fff;border-radius:28px;padding:24px 22px 18px;max-width:380px;width:100%;box-shadow:0 6px 0 #FFC2DA;display:flex;flex-direction:column;align-items:center;gap:16px}
+.quote{margin:0;display:flex;flex-direction:column;align-items:center;gap:10px;min-height:120px;justify-content:center}
+.quote.show{animation:pop .45s cubic-bezier(.2,1.4,.4,1)}
+.quote p{font-size:22px;font-weight:700;line-height:1.35;letter-spacing:-.01em;margin:0;color:#5A1838}
+.quote cite{font-style:normal;font-size:14px;font-weight:700;color:#C2185B}
+@keyframes pop{from{opacity:0;transform:scale(.85)}}
+.quote p.stop{font-family:'Chewy','Plus Jakarta Sans',cursive;font-weight:400;font-size:32px;line-height:1.2;color:#E0337E;letter-spacing:.02em;animation:wiggle .5s ease-in-out 3;overflow-wrap:anywhere}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg) scale(1.05)}75%{transform:rotate(5deg) scale(1.05)}}
+.dice-btn{border:none;background:transparent;display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px;min-height:44px}
+.die{width:58px;height:58px;border-radius:15px;background:#FF4F9A;box-shadow:0 5px 0 #C2185B;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:9px;gap:2px}
+.die i{width:10px;height:10px;border-radius:999px;background:#fff;place-self:center;opacity:0}
+.die i.on{opacity:1}
+.die.rolling{animation:roll .9s cubic-bezier(.3,.7,.4,1)}
+@keyframes roll{0%{transform:translateY(0) rotate(0)}25%{transform:translateY(-34px) rotate(200deg) scale(1.1)}55%{transform:translateY(0) rotate(400deg)}72%{transform:translateY(-10px) rotate(520deg)}100%{transform:translateY(0) rotate(720deg)}}
+.dice-label{font-size:12px;font-weight:700;color:#C2185B}
+.play-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.play{width:136px;height:136px;border-radius:999px;border:none;padding:8px;display:flex;align-items:center;justify-content:center;background:conic-gradient(#FF4F9A 0 90deg,#FFB3D1 90deg 180deg,#E0337E 180deg 270deg,#FF85B8 270deg 360deg)}
+.play span{width:100%;height:100%;border-radius:999px;background:#C2185B;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.play:active span{transform:scale(.94)}
+.play-label{font-family:'Chewy','Plus Jakarta Sans',cursive;font-size:26px;color:#C2185B;letter-spacing:.03em}
+.credit{font-size:10px;font-weight:600;color:#D45A8F;margin:0}
+@keyframes up{from{transform:translateY(100%)}}
+@keyframes fade{from{opacity:0}}
+/* ---------- Pink theme for the whole app ---------- */
+:root{--bg:#FFE6F0;--ink:#5A1838;--muted:#9C3D6A;--faint:#C77A9E;--line:#FFD0E2;--line2:#FFE3EE;--shadow:0 4px 0 #FFC9DE}
+:focus-visible{outline-color:#E0337E}
+.title,.sec-head h2,.card-top b,.sheet-head h2{font-family:'Chewy','Plus Jakarta Sans',cursive;font-weight:400;letter-spacing:.02em;color:#C2185B}
+.title{font-size:42px}
+.sec-head h2{font-size:25px}
+.sec-head span{color:#C2185B}
+.card-top b{font-size:23px}
+.sheet-head h2{font-size:25px}
+.pill{box-shadow:var(--shadow);color:#9C1B55}
+.bar{background:#FFD0E2}
+.bar>i{background:linear-gradient(90deg,#FF7EB6,#E0337E)}
+.week,.cal,.card,.list,.row,.empty,.co-pick,.input,.navbtn.solid{box-shadow:var(--shadow)}
+.day.today .n{box-shadow:inset 0 0 0 2px #E0337E;color:#C2185B}
+.day.sel .n{background:#E0337E;color:#fff;box-shadow:0 3px 0 #A3155A}
+.navbtn{color:#C2185B}
+.btn.dark{background:#E0337E;color:#fff;box-shadow:0 4px 0 #A3155A}
+.btn.soft{background:#FFE6F0;color:#C2185B}
+.btn.ghost{border-color:#FF9EC6;color:#C2185B;background:rgba(255,255,255,.5)}
+.btn[data-act=save-item],.btn[data-act=save-co]{box-shadow:0 4px 0 rgba(0,0,0,.18)}
+.fab{background:#E0337E;box-shadow:0 5px 0 #A3155A}
+.fab:active,.btn:active{transform:translateY(2px)}
+.tabbar{border-top:2px solid #FFD0E2}
+.tab{color:#A34E78}
+.tab.on{color:#E0337E}
+.seg{background:#FFD0E2}
+.seg button.on{color:#C2185B;box-shadow:0 2px 0 #FFC2DA}
+.overlay{background:rgba(90,24,56,.35)}
+.grab{background:#FF9EC6}
+.link{color:#C2185B}
+.co-row{border-bottom-color:#FFE3EE}
+html.home-mode,body.home-mode{background:#FFE6F0}
+/* ---------- Celebration ---------- */
+.party{position:fixed;inset:0;z-index:40;background:linear-gradient(180deg,#FFD0E2,#FF9EC6);display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top) + 24px) 24px calc(env(safe-area-inset-bottom) + 24px);overflow:hidden;animation:fade .3s}
+.party-card{position:relative;z-index:2;background:#fff;border-radius:32px;padding:34px 26px 26px;max-width:380px;width:100%;text-align:center;box-shadow:0 8px 0 #C2185B;display:flex;flex-direction:column;align-items:center;gap:16px;animation:pop .6s cubic-bezier(.2,1.5,.4,1)}
+.party-heart{font-size:64px;line-height:1;animation:beat 1.1s ease-in-out infinite}
+.party h2{font-family:'Chewy','Plus Jakarta Sans',cursive;font-weight:400;font-size:44px;line-height:1;color:#E0337E;margin:0;letter-spacing:.02em}
+.party p{font-size:19px;font-weight:700;line-height:1.4;color:#5A1838;margin:0}
+.party-card{max-height:100%;overflow-y:auto}
+.sum{width:100%;display:flex;flex-direction:column;gap:8px;text-align:left}
+.sum-h{font-family:'Chewy','Plus Jakarta Sans',cursive;font-size:22px;color:#C2185B;letter-spacing:.02em}
+.sum-row{display:flex;align-items:center;gap:10px;background:#FFF2F7;border-radius:14px;padding:10px 12px;font-size:15px;font-weight:600;color:#5A1838}
+.sum-row .dot{width:12px;height:12px}
+.sum-row b{font-weight:800}
+.big{font-size:20px;font-weight:800;color:#5A1838;margin:0}
+.party .stat{font-size:14px;font-weight:700;color:#C2185B;background:#FFE6F0;border-radius:999px;padding:8px 14px}
+.confetti{position:absolute;top:-40px;z-index:1;pointer-events:none;animation:fall linear forwards}
+.confetti.bit{width:10px;height:16px;border-radius:3px}
+.confetti.heart{font-size:22px;line-height:1}
+@keyframes fall{to{transform:translateY(110vh) rotate(var(--spin))}}
+@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.18)}30%{transform:scale(1)}45%{transform:scale(1.12)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+
+<button class="fab" data-act="add" aria-label="Add task or post">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<nav class="tabbar" aria-label="Sections">
+  <button class="tab" data-act="tab" data-view="home">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-6.5 8 6.5V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><path d="M10 20.5v-5h4v5"/></svg>Home
+  </button>
+  <button class="tab" data-act="tab" data-view="today">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.8"/></svg>Day
+  </button>
+  <button class="tab" data-act="tab" data-view="month">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Month
+  </button>
+  <button class="tab" data-act="tab" data-view="companies">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="9" r="3.5"/><circle cx="16" cy="9" r="3.5"/><circle cx="12" cy="16" r="3.5"/></svg>Companies
+  </button>
+</nav>
+
+<div id="sheet-root"></div>
+<div id="party-root"></div>
+<input type="file" id="import-file" accept="application/json,.json" hidden>
+
+<script>
+'use strict';
+
+/* ---------- Storage ---------- */
+const KEY = 'agenda.v1';
+const PALETTE = ['#2F6FEB','#0E8FC2','#14967F','#3E9B2F','#B58A00','#D9681C','#D23B3B','#D43F8D','#8B5CF6','#5B4BD6','#6B7180','#16181D'];
+
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if (d && Array.isArray(d.companies) && Array.isArray(d.items)) return d;
+  } catch (e) {}
+  return { companies: [], items: [], lastCo: null };
+}
+let data = load();
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(data)); }
+  catch (e) { alert('Could not save. The phone may be out of storage.'); }
+}
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
+
+/* ---------- Helpers ---------- */
+const WEEKDAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const pad = (n) => String(n).padStart(2, '0');
+const keyOf = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const parseKey = (k) => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+const todayKey = () => keyOf(new Date());
+const addDays = (k, n) => { const d = parseKey(k); d.setDate(d.getDate() + n); return keyOf(d); };
+const dow = (k) => (parseKey(k).getDay() + 6) % 7; // Monday = 0
+const weekStart = (k) => addDays(k, -dow(k));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function mix(hex, to, t) {
+  const a = parseInt(hex.slice(1), 16), b = parseInt(to.slice(1), 16);
+  const ch = (s) => Math.round(((a >> s) & 255) * (1 - t) + ((b >> s) & 255) * t);
+  return '#' + ((1 << 24) | (ch(16) << 16) | (ch(8) << 8) | ch(0)).toString(16).slice(1);
+}
+const tint = (c) => mix(c, '#FFFFFF', 0.86);
+const ink = (c) => mix(c, '#000000', 0.35);
+
+const NO_CO = { id: null, name: 'No company', color: '#8A8F9C' };
+const co = (id) => data.companies.find((c) => c.id === id) || NO_CO;
+// Use the live company, or the saved name/color if that company was deleted (keeps history).
+const coOf = (it) => data.companies.find((c) => c.id === it.companyId) || (it.coName ? { id: it.companyId, name: it.coName, color: it.coColor } : NO_CO);
+const snap = (it) => { const c = data.companies.find((x) => x.id === it.companyId); if (c) { it.coName = c.name; it.coColor = c.color; } };
+const byTime = (a, b) => (a.time || '99') < (b.time || '99') ? -1 : (a.time || '99') > (b.time || '99') ? 1 : a.title.localeCompare(b.title);
+const itemsOn = (k) => data.items.filter((i) => i.date === k).sort(byTime);
+
+const CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const LEFT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+const RIGHT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+const CHEV = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E0337E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+
+function dotsFor(k) {
+  const list = itemsOn(k);
+  const ids = [...new Set(list.map((i) => i.companyId))].slice(0, 4);
+  const allDone = list.length > 0 && list.every((i) => i.done);
+  return '<span class="dots' + (allDone ? ' faded' : '') + '">' + ids.map((id) => '<i style="background:' + coOf(list.find((i) => i.companyId === id)).color + '"></i>').join('') + '</span>';
+}
+function companyChips(list) {
+  const ids = [...new Set(list.map((i) => i.companyId))];
+  return ids.map((id) => {
+    const mine = list.filter((i) => i.companyId === id), c = coOf(mine[0]);
+    const d = mine.filter((i) => i.done).length;
+    return '<span class="chip" style="background:' + tint(c.color) + ';color:' + ink(c.color) + '"><span class="dot" style="background:' + c.color + '"></span>' + esc(c.name) + ' <span style="opacity:.8">' + d + '/' + mine.length + '</span></span>';
+  }).join('');
+}
+
+/* ---------- UI state ---------- */
+const ui = { view: 'home', quote: Math.floor(Math.random() * 30), face: 1 + Math.floor(Math.random() * 6), sel: todayKey(), month: todayKey().slice(0, 7), sheet: null };
+
+/* ---------- Home ---------- */
+const QUOTES = [
+  ['Well begun is half done.', 'Aristotle'],
+  ['Well done is better than well said.', 'Benjamin Franklin'],
+  ['Diligence is the mother of good luck.', 'Benjamin Franklin'],
+  ['Energy and persistence conquer all things.', 'Benjamin Franklin'],
+  ['Do what you can, with what you have, where you are.', 'Theodore Roosevelt'],
+  ['Fortune favors the bold.', 'Virgil'],
+  ['Slow and steady wins the race.', 'Aesop'],
+  ['Begin, be bold, and venture to be wise.', 'Horace'],
+  ['Nothing will work unless you do.', 'Maya Angelou'],
+  ['Small deeds done are better than great deeds planned.', 'Peter Marshall'],
+  ['Little by little, one travels far.', 'Spanish proverb'],
+  ['Either I will find a way, or I will make one.', 'Philip Sidney'],
+  ['Genius is one percent inspiration and ninety-nine percent perspiration.', 'Thomas Edison'],
+  ['Great things are done by a series of small things brought together.', 'Vincent van Gogh'],
+  ["You miss 100% of the shots you don't take.", 'Wayne Gretzky'],
+  ['Coffee first. Conquer the world second.', 'WWA wisdom'],
+  ['Done is better than perfect. Perfect is still loading.', 'WWA wisdom'],
+  ["Today's forecast: 100% chance of getting things done.", 'WWA wisdom'],
+  ['Work hard, post harder.', 'WWA wisdom'],
+  ['Make today so productive that tomorrow gets jealous.', 'WWA wisdom'],
+  ['Your tasks are scared of you. Go show them why.', 'WWA wisdom'],
+  ['If at first you don\'t succeed, have a snack and try again.', 'WWA wisdom'],
+  ['Rome was not built in a day. Rome did not have WWA.', 'WWA wisdom'],
+  ['Every check mark is a tiny trophy. Collect them all.', 'WWA wisdom'],
+  ['Slay the day. Then take a well-deserved nap.', 'WWA wisdom'],
+  ['You are the CEO of getting it done.', 'WWA wisdom'],
+  ['Behind every great post is a woman who scheduled it.', 'WWA wisdom'],
+  ['Be so good the algorithm falls in love with you.', 'WWA wisdom'],
+  ['Deadlines? You eat those for breakfast. With pink sprinkles.', 'WWA wisdom'],
+  ['Work work work work work. Then dessert.', 'WWA wisdom']
+];
+const PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+const dieHtml = (n) => [0,1,2,3,4,5,6,7,8].map((i) => '<i class="' + (PIPS[n].includes(i) ? 'on' : '') + '"></i>').join('');
+const quoteHtml = () => { const q = QUOTES[ui.quote % QUOTES.length]; return '<p>\u201C' + esc(q[0]) + '\u201D</p><cite>' + esc(q[1]) + '</cite>'; };
+let rolling = false;
+// Easter egg: what she sees when she keeps rolling instead of working.
+const ROLL_MESSAGES = {
+  10: 'Stop rolling and go work Girl <3',
+  11: 'omg stop rollin',
+  12: 'aaaaaaaaaaaaaaaaaaaaa',
+  13: "Zhenya it's me Dylan if you dont work im gonna die aaaaa",
+  14: 'WORK!'
+};
+function rollMessage(n) {
+  if (ROLL_MESSAGES[n]) return ROLL_MESSAGES[n];
+  if (n >= 15 && n <= 34) return 'WORK! ' + '\u{1F621}'.repeat(n - 14); // 1 to 20 mad faces
+  return null; // roll 35 and up: normal quotes again
+}
+function rollDice() {
+  if (rolling) return;
+  const die = document.getElementById('die'), box = document.getElementById('quote');
+  if (!die || !box) return;
+  rolling = true;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  die.classList.remove('rolling'); void die.offsetWidth; die.classList.add('rolling');
+  const spin = setInterval(() => { die.innerHTML = dieHtml(1 + Math.floor(Math.random() * 6)); }, 90);
+  setTimeout(() => {
+    clearInterval(spin);
+    const face = 1 + Math.floor(Math.random() * 6);
+    ui.face = face;
+    die.innerHTML = dieHtml(face);
+    die.classList.remove('rolling');
+    ui.rolls = (ui.rolls || 0) + 1;
+    const msg = rollMessage(ui.rolls);
+    if (msg) {
+      box.innerHTML = '<p class="stop">' + esc(msg) + '</p>';
+    } else {
+      ui.quote = (ui.quote + 1 + Math.floor(Math.random() * (QUOTES.length - 1))) % QUOTES.length;
+      box.innerHTML = quoteHtml();
+    }
+    box.classList.remove('show'); void box.offsetWidth; box.classList.add('show');
+    rolling = false;
+  }, reduce ? 150 : 900);
+}
+
+function viewHome() {
+  const tk = todayKey(), d = parseKey(tk), list = itemsOn(tk);
+  const open = list.filter((i) => !i.done).length;
+  const line = !list.length ? 'Nothing planned today' : open ? open + (open === 1 ? ' thing' : ' things') + ' to do today' : 'Everything done today';
+  return '<div class="home">' +
+    '<div><h1 class="brand" aria-label="WWA"><span aria-hidden="true">W</span><span aria-hidden="true">W</span><span aria-hidden="true">A</span></h1><div class="brand-sub">Work Work App</div><div class="today-line">' + WEEKDAYS[dow(tk)] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate() + '. ' + line + '</div></div>' +
+    '<div class="quote-box"><blockquote class="quote show" id="quote" aria-live="polite">' + quoteHtml() + '</blockquote>' +
+    '<button class="dice-btn" data-act="roll" aria-label="Roll the dice for a new quote"><span class="die" id="die">' + dieHtml(ui.face) + '</span><span class="dice-label">Roll for a new quote</span></button></div>' +
+    '<div class="play-wrap"><button class="play" data-act="play" aria-label="Start"><span><svg width="44" height="44" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg></span></button>' +
+    '<div class="play-label">Start</div></div>' +
+    '<p class="credit">Made by Dylan for my beautiful wife Evgeniya</p>' +
+    '</div>';
+}
+
+/* ---------- Views ---------- */
+function rowHtml(it) {
+  const c = coOf(it);
+  return '<div class="row' + (it.done ? ' done' : '') + '" style="--c:' + c.color + '">' +
+    '<button class="check' + (it.done ? ' on' : '') + '" data-act="toggle" data-id="' + it.id + '" aria-pressed="' + it.done + '" aria-label="' + (it.done ? 'Mark not done: ' : 'Mark done: ') + esc(it.title) + '"><span>' + (it.done ? CHECK : '') + '</span></button>' +
+    '<button class="row-main" data-act="edit" data-id="' + it.id + '"><span class="row-title">' + esc(it.title) + '</span>' +
+    '<span class="meta"><span class="tag" style="background:' + tint(c.color) + ';color:' + ink(c.color) + '">' + esc(c.name) + '</span>' +
+    (it.time ? '<span class="time">' + it.time + '</span>' : '') + '</span></button></div>';
+}
+
+function sectionHtml(title, list, emptyText) {
+  const d = list.filter((i) => i.done).length;
+  return '<section class="section"><div class="sec-head"><h2>' + title + '</h2>' + (list.length ? '<span>' + d + ' / ' + list.length + '</span>' : '') + '</div>' +
+    (list.length ? list.map(rowHtml).join('') : '<div class="empty small">' + emptyText + '</div>') + '</section>';
+}
+
+function viewToday() {
+  const k = ui.sel, d = parseKey(k), isToday = k === todayKey();
+  const list = itemsOn(k);
+  const done = list.filter((i) => i.done).length;
+  const ws = weekStart(k);
+  let week = '<div class="week"><button class="navbtn" data-act="week" data-n="-7" aria-label="Previous week">' + LEFT + '</button>';
+  for (let i = 0; i < 7; i++) {
+    const dk = addDays(ws, i), dd = parseKey(dk);
+    const cls = ['day', dk === k ? 'sel' : '', dk === todayKey() ? 'today' : '', dk < todayKey() ? 'past' : ''].join(' ');
+    week += '<button class="' + cls + '" data-act="pick-day" data-key="' + dk + '" aria-label="' + WEEKDAYS[i] + ' ' + MONTHS[dd.getMonth()] + ' ' + dd.getDate() + '"><span class="l">' + WEEKDAYS[i].slice(0, 3) + '</span><span class="n">' + dd.getDate() + '</span>' + dotsFor(dk) + '</button>';
+  }
+  week += '<button class="navbtn" data-act="week" data-n="7" aria-label="Next week">' + RIGHT + '</button></div>';
+
+  let body;
+  if (!data.companies.length) {
+    body = '<div class="section"><div class="empty">Start by adding the companies you work for. Each one gets its own color.</div><button class="btn dark" data-act="add-co">Add first company</button></div>';
+  } else if (!list.length) {
+    body = '<div class="section"><div class="empty">Nothing planned for this day. Tap + to add a task or a post.</div></div>';
+  } else {
+    body = sectionHtml('Tasks', list.filter((i) => i.kind === 'task'), 'No tasks this day.') +
+           sectionHtml('Posts', list.filter((i) => i.kind === 'post'), 'No posts this day.');
+  }
+
+  return '<div class="screen">' +
+    '<div class="head"><div><div class="kicker">' + WEEKDAYS[dow(k)] + (isToday ? ', today' : '') + '</div><h1 class="title">' + MONTHS[d.getMonth()] + ' ' + d.getDate() + '</h1></div>' +
+    '<div class="head-right">' + (!isToday ? '<button class="pill" data-act="go-today">Go to today</button>' : '') +
+    (list.length ? '<span class="pill">' + done + ' of ' + list.length + ' done</span>' : '') + '</div></div>' +
+    (list.length ? '<div class="bar"><i style="width:' + Math.round(done / list.length * 100) + '%"></i></div><div class="chips">' + companyChips(list) + '</div>' : '') +
+    week + body + '</div>';
+}
+
+function viewMonth() {
+  const [y, m] = ui.month.split('-').map(Number);
+  const first = new Date(y, m - 1, 1);
+  const offset = (first.getDay() + 6) % 7;
+  const days = new Date(y, m, 0).getDate();
+  let cells = '';
+  for (let i = 0; i < offset; i++) cells += '<div></div>';
+  for (let d = 1; d <= days; d++) {
+    const dk = y + '-' + pad(m) + '-' + pad(d);
+    const n = itemsOn(dk).length;
+    const cls = ['day', dk === ui.sel ? 'sel' : '', dk === todayKey() ? 'today' : '', dk < todayKey() ? 'past' : ''].join(' ');
+    cells += '<button class="' + cls + '" data-act="pick-day" data-key="' + dk + '" aria-label="' + MONTHS[m - 1] + ' ' + d + ', ' + n + (n === 1 ? ' item' : ' items') + '"><span class="n">' + d + '</span>' + dotsFor(dk) + '</button>';
+  }
+  const sk = ui.sel, sd = parseKey(sk), list = itemsOn(sk), done = list.filter((i) => i.done).length;
+  const inMonth = sk.slice(0, 7) === ui.month;
+  const summary = inMonth ?
+    '<div class="card"><div class="card-top"><b>' + WEEKDAYS[dow(sk)] + ', ' + MONTHS[sd.getMonth()].slice(0, 3) + ' ' + sd.getDate() + '</b><span>' + (list.length ? done + ' of ' + list.length + ' done' : 'Free day') + '</span></div>' +
+    (list.length ? '<div class="bar"><i style="width:' + Math.round(done / list.length * 100) + '%"></i></div><div class="chips">' + companyChips(list) + '</div>' : '') +
+    '<button class="btn soft" data-act="open-day">Open this day</button></div>' : '';
+  const isCur = ui.month === todayKey().slice(0, 7), isPast = ui.month < todayKey().slice(0, 7);
+  const monthDone = data.items.filter((i) => i.done && i.date.slice(0, 7) === ui.month).length;
+  const recapBtn = (isCur || isPast) ? '<button class="btn dark" style="margin-top:14px" data-act="recap">' + (isCur ? 'See ' + MONTHS[m - 1] + ' so far' : 'See ' + MONTHS[m - 1] + ' results') + ' (' + monthDone + ' done)</button>' : '';
+
+  return '<div class="screen">' +
+    '<div class="head"><div><div class="kicker">' + y + '</div><h1 class="title">' + MONTHS[m - 1] + '</h1></div>' +
+    '<div style="display:flex;gap:6px"><button class="navbtn solid" data-act="month" data-n="-1" aria-label="Previous month">' + LEFT + '</button><button class="navbtn solid" data-act="month" data-n="1" aria-label="Next month">' + RIGHT + '</button></div></div>' +
+    '<div class="cal"><div class="cal-h"><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div></div><div class="cal-g">' + cells + '</div></div>' +
+    summary + recapBtn + '</div>';
+}
+
+function viewCompanies() {
+  const ws = weekStart(todayKey()), we = addDays(ws, 6);
+  const rows = data.companies.map((c) => {
+    const wk = data.items.filter((i) => i.companyId === c.id && i.date >= ws && i.date <= we);
+    const t = wk.filter((i) => i.kind === 'task').length, p = wk.length - t;
+    const txt = wk.length ? t + (t === 1 ? ' task, ' : ' tasks, ') + p + (p === 1 ? ' post' : ' posts') + ' this week' : 'Nothing this week';
+    return '<button class="co-row" data-act="edit-co" data-id="' + c.id + '"><span class="sw" style="background:' + c.color + '"></span><span class="co-text"><b>' + esc(c.name) + '</b><span>' + txt + '</span></span>' + CHEV + '</button>';
+  }).join('');
+  return '<div class="screen">' +
+    '<div class="head"><div><div class="kicker">Each company gets its own color</div><h1 class="title">Companies</h1></div></div>' +
+    (rows ? '<div class="list">' + rows + '</div>' : '') +
+    '<button class="btn ghost" data-act="add-co"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add company</button>' +
+    '<div class="card"><div class="card-top"><b>Backup</b></div><p class="note">Everything is saved on this phone only. Export a backup now and then, and keep it in Files or send it to yourself.</p>' +
+    '<div class="two"><button class="btn soft" data-act="export">Export backup</button><button class="btn soft" data-act="import">Import backup</button></div></div>' +
+    '</div>';
+}
+
+/* ---------- Sheets ---------- */
+function sheetWrap(title, inner, leftLabel) {
+  const still = ui.sheet.shown ? ' still' : '';
+  ui.sheet.shown = true;
+  return '<div class="overlay' + still + '" data-act="close-overlay"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title"><div class="grab"></div>' +
+    '<div class="sheet-head"><button class="link" data-act="close">' + (leftLabel || 'Cancel') + '</button><h2 id="sheet-title">' + title + '</h2><span></span></div>' + inner + '</div></div>';
+}
+
+function sheetItem() {
+  const d = ui.sheet.draft, editing = !!d.id, isTask = d.kind === 'task';
+  if (!data.companies.length) {
+    return sheetWrap('New item', '<div class="empty">Add a company first, so the item knows which color to use.</div><button class="btn dark" data-act="add-co">Add company</button>');
+  }
+  const picks = data.companies.map((c) => {
+    const on = c.id === d.companyId;
+    return '<button class="co-pick" data-act="pick-co" data-id="' + c.id + '" aria-pressed="' + on + '" style="' + (on ? 'background:' + tint(c.color) + ';color:' + ink(c.color) + ';box-shadow:inset 0 0 0 2px ' + c.color : '') + '"><span class="dot" style="background:' + c.color + '"></span>' + esc(c.name) + '</button>';
+  }).join('');
+  const sc = co(d.companyId);
+  const label = editing ? 'Save changes' : 'Add ' + (isTask ? 'task' : 'post') + ' for ' + esc(sc.name);
+  return sheetWrap(editing ? 'Edit ' + (isTask ? 'task' : 'post') : 'New item',
+    '<div class="seg" role="group" aria-label="Type"><button class="' + (isTask ? 'on' : '') + '" data-act="kind" data-kind="task" aria-pressed="' + isTask + '">Task</button><button class="' + (!isTask ? 'on' : '') + '" data-act="kind" data-kind="post" aria-pressed="' + !isTask + '">Post</button></div>' +
+    '<div class="field"><label class="flabel" for="f-title">Title</label><input class="input" id="f-title" data-field="title" type="text" autocomplete="off" placeholder="' + (isTask ? 'e.g. Review product photos' : 'e.g. Instagram reel') + '" value="' + esc(d.title) + '">' + (ui.sheet.error ? '<p class="err">' + ui.sheet.error + '</p>' : '') + '</div>' +
+    '<div class="field"><span class="flabel">Company</span><div class="two">' + picks + '</div></div>' +
+    '<div class="two"><div class="field"><label class="flabel" for="f-date">Date</label><input class="input" id="f-date" data-field="date" type="date" value="' + d.date + '"></div>' +
+    '<div class="field"><label class="flabel" for="f-time">Time (optional)</label><input class="input" id="f-time" data-field="time" type="time" value="' + (d.time || '') + '"></div></div>' +
+    '<button class="btn" data-act="save-item" style="background:' + ink(sc.color) + ';color:#fff">' + label + '</button>' +
+    (editing ? '<button class="btn danger" data-act="delete-item">Delete ' + (isTask ? 'task' : 'post') + '</button>' : ''));
+}
+
+function sheetCompany() {
+  const d = ui.sheet.draft, editing = !!d.id;
+  const pal = PALETTE.map((c) => '<button class="' + (c === d.color ? 'on' : '') + '" data-act="pick-color" data-color="' + c + '" aria-label="Color ' + c + '" aria-pressed="' + (c === d.color) + '" style="background:' + c + '"></button>').join('');
+  return sheetWrap(editing ? 'Edit company' : 'New company',
+    '<div class="field"><label class="flabel" for="f-name">Name</label><input class="input" id="f-name" data-field="name" type="text" autocomplete="off" placeholder="Company name" value="' + esc(d.name) + '">' + (ui.sheet.error ? '<p class="err">' + ui.sheet.error + '</p>' : '') + '</div>' +
+    '<div class="field"><span class="flabel">Color</span><div class="palette">' + pal + '</div></div>' +
+    '<button class="btn" data-act="save-co" style="background:' + ink(d.color) + ';color:#fff">' + (editing ? 'Save changes' : 'Add company') + '</button>' +
+    (editing ? '<button class="btn danger" data-act="delete-co">Delete company</button>' : ''));
+}
+
+/* ---------- Render ---------- */
+function render() {
+  document.body.classList.toggle('home-mode', ui.view === 'home');
+  document.documentElement.classList.toggle('home-mode', ui.view === 'home');
+    document.getElementById('app').innerHTML = ui.view === 'home' ? viewHome() : ui.view === 'today' ? viewToday() : ui.view === 'month' ? viewMonth() : viewCompanies();
+  document.querySelectorAll('.tab').forEach((t) => {
+    const on = t.dataset.view === ui.view;
+    t.classList.toggle('on', on);
+    if (on) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+  });
+  document.querySelector('.fab').hidden = ui.view === 'companies';
+  renderSheet();
+}
+function renderSheet() {
+  const root = document.getElementById('sheet-root');
+  if (!ui.sheet) { root.innerHTML = ''; document.body.style.overflow = ''; return; }
+  root.innerHTML = ui.sheet.type === 'item' ? sheetItem() : sheetCompany();
+  document.body.style.overflow = 'hidden';
+}
+
+function openItemSheet(item) {
+  const fallbackCo = data.companies.some((c) => c.id === data.lastCo) ? data.lastCo : (data.companies[0] || {}).id || null;
+  ui.sheet = { type: 'item', draft: item ? { ...item } : { kind: 'task', title: '', companyId: fallbackCo, date: ui.sel, time: '' } };
+  renderSheet();
+}
+function openCompanySheet(c) {
+  const used = data.companies.map((x) => x.color);
+  const free = PALETTE.find((p) => !used.includes(p)) || PALETTE[0];
+  ui.sheet = { type: 'company', draft: c ? { ...c } : { name: '', color: free }, back: ui.sheet && ui.sheet.type === 'item' };
+  renderSheet();
+}
+
+/* ---------- Celebration ---------- */
+const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
+
+// "2 tasks for Brand A" lines, grouped by company
+function summaryHtml(list, kind, heading) {
+  const mine = list.filter((i) => i.kind === kind && i.done);
+  if (!mine.length) return '';
+  const groups = {};
+  mine.forEach((i) => {
+    const c = coOf(i), k = c.name + '|' + c.color;
+    (groups[k] = groups[k] || { c: c, n: 0 }).n++;
+  });
+  const rows = Object.values(groups).sort((x, y) => y.n - x.n).map((g) =>
+    '<div class="sum-row"><span class="dot" style="background:' + g.c.color + '"></span><span>' + plural(g.n, kind) + ' for <b>' + esc(g.c.name) + '</b></span></div>').join('');
+  return '<div class="sum"><div class="sum-h">' + heading + '</div>' + rows + '</div>';
+}
+
+function showParty(title, intro, list, closeLabel, confetti) {
+  const colors = ['#FF4F9A', '#E0337E', '#FFB3D1', '#C2185B', '#FFFFFF'].concat(data.companies.map((c) => c.color));
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let bits = '';
+  if (confetti && !reduce) {
+    for (let i = 0; i < 70; i++) {
+      const left = Math.random() * 100, dur = 2.6 + Math.random() * 2.4, delay = Math.random() * 1.6;
+      const spin = (Math.random() < .5 ? -1 : 1) * (360 + Math.random() * 540);
+      const style = 'left:' + left + '%;animation-duration:' + dur + 's;animation-delay:' + delay + 's;--spin:' + spin + 'deg';
+      bits += i % 6 === 0
+        ? '<span class="confetti heart" style="' + style + '">\u{1F496}</span>'
+        : '<span class="confetti bit" style="' + style + ';background:' + colors[i % colors.length] + '"></span>';
+    }
+  }
+  document.getElementById('party-root').innerHTML =
+    '<div class="party" role="dialog" aria-modal="true" aria-labelledby="party-title">' + bits +
+    '<div class="party-card"><div class="party-heart" aria-hidden="true">\u{1F496}</div>' +
+    '<h2 id="party-title">' + title + '</h2>' + intro +
+    summaryHtml(list, 'task', 'Tasks done') + summaryHtml(list, 'post', 'Posts done') +
+    '<button class="btn dark" data-act="close-party">' + closeLabel + '</button></div></div>';
+}
+
+function celebrate(day) {
+  showParty('Congratulations!', "<p>I'm really proud of you, keep up the good work</p>", day, 'Thank you &lt;3', true);
+}
+
+const prevMonth = (ym) => { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m - 2, 1); return d.getFullYear() + '-' + pad(d.getMonth() + 1); };
+
+function monthRecap(ym) {
+  const [y, m] = ym.split('-').map(Number);
+  const list = data.items.filter((i) => i.done && i.date.slice(0, 7) === ym);
+  const t = list.filter((i) => i.kind === 'task').length, p = list.length - t;
+  const current = ym === todayKey().slice(0, 7);
+  const name = MONTHS[m - 1];
+  if (!list.length) {
+    showParty(name + ' ' + y, '<p>' + (current ? 'Nothing checked off yet this month. The first check mark is the hardest, you got this!' : 'Nothing was checked off in ' + name + '.') + '</p>', list, 'Okay &lt;3', false);
+    return;
+  }
+  const intro = current
+    ? '<p class="big">So far in ' + name + ' you completed ' + plural(t, 'task') + ' and ' + plural(p, 'post') + '!</p><p>I\'m really proud of you, keep going</p>'
+    : '<p class="big">In ' + name + ' you completed ' + plural(t, 'task') + ' and ' + plural(p, 'post') + '!</p><p>I\'m really proud of you, keep up the good work</p>';
+  showParty(current ? name + ' so far' : 'Congratulations!', intro, list, 'Thank you &lt;3', true);
+}
+
+// On the first open of a new month, celebrate the month that just ended (once).
+function checkMonthRecap() {
+  const last = prevMonth(todayKey().slice(0, 7));
+  if (data.recapShown === last || (data.recapShown && data.recapShown > last)) return;
+  const had = data.items.some((i) => i.done && i.date.slice(0, 7) === last);
+  data.recapShown = last; save();
+  if (had) monthRecap(last);
+}
+
+/* ---------- Actions ---------- */
+const actions = {
+  'tab': (el) => { ui.rolls = 0; ui.view = el.dataset.view; if (ui.view === 'month') ui.month = ui.sel.slice(0, 7); render(); window.scrollTo(0, 0); },
+  'toggle': (el) => {
+    const it = data.items.find((i) => i.id === el.dataset.id);
+    if (!it) return;
+    it.done = !it.done;
+    snap(it);
+    save(); render();
+    const day = itemsOn(it.date);
+    if (it.done && day.length && day.every((i) => i.done)) celebrate(day);
+  },
+  'recap': () => monthRecap(ui.month),
+  'close-party': () => { document.getElementById('party-root').innerHTML = ''; },
+  'edit': (el) => { const it = data.items.find((i) => i.id === el.dataset.id); if (it) openItemSheet(it); },
+  'add': () => openItemSheet(null),
+  'play': () => { ui.rolls = 0; ui.view = 'today'; ui.sel = todayKey(); render(); window.scrollTo(0, 0); },
+  'roll': () => rollDice(),
+  'week': (el) => { ui.sel = addDays(ui.sel, Number(el.dataset.n)); render(); },
+  'pick-day': (el) => { ui.sel = el.dataset.key; render(); },
+  'go-today': () => { ui.sel = todayKey(); render(); },
+  'month': (el) => { const [y, m] = ui.month.split('-').map(Number); const d = new Date(y, m - 1 + Number(el.dataset.n), 1); ui.month = d.getFullYear() + '-' + pad(d.getMonth() + 1); render(); },
+  'open-day': () => { ui.view = 'today'; render(); window.scrollTo(0, 0); },
+  'close': () => { ui.sheet = null; renderSheet(); },
+  'close-overlay': (el, e) => { if (e.target === el) { ui.sheet = null; renderSheet(); } },
+  'kind': (el) => { ui.sheet.draft.kind = el.dataset.kind; renderSheet(); },
+  'pick-co': (el) => { ui.sheet.draft.companyId = el.dataset.id; renderSheet(); },
+  'save-item': () => {
+    const d = ui.sheet.draft;
+    d.title = (d.title || '').trim();
+    if (!d.title) { ui.sheet.error = 'Add a title first.'; renderSheet(); document.getElementById('f-title').focus(); return; }
+    if (!d.date) d.date = ui.sel;
+    if (d.id) { const i = data.items.findIndex((x) => x.id === d.id); if (i > -1) data.items[i] = { ...data.items[i], ...d }; }
+    else data.items.push({ id: uid(), kind: d.kind, title: d.title, companyId: d.companyId, date: d.date, time: d.time || '', done: false });
+    data.items.forEach((i) => { if (i.companyId === d.companyId) snap(i); });
+    data.lastCo = d.companyId;
+    save(); ui.sel = d.date; ui.sheet = null; render();
+  },
+  'delete-item': () => {
+    if (!confirm('Delete this ' + ui.sheet.draft.kind + '?')) return;
+    data.items = data.items.filter((i) => i.id !== ui.sheet.draft.id);
+    save(); ui.sheet = null; render();
+  },
+  'add-co': () => openCompanySheet(null),
+  'edit-co': (el) => { const c = data.companies.find((x) => x.id === el.dataset.id); if (c) openCompanySheet(c); },
+  'pick-color': (el) => { ui.sheet.draft.color = el.dataset.color; renderSheet(); },
+  'save-co': () => {
+    const d = ui.sheet.draft;
+    d.name = (d.name || '').trim();
+    if (!d.name) { ui.sheet.error = 'Add a name first.'; renderSheet(); document.getElementById('f-name').focus(); return; }
+    let id = d.id;
+    if (id) { const c = data.companies.find((x) => x.id === id); Object.assign(c, { name: d.name, color: d.color }); }
+    else { id = uid(); data.companies.push({ id: id, name: d.name, color: d.color }); }
+    data.items.forEach((i) => { if (i.companyId === id) snap(i); });
+    save();
+    const back = ui.sheet.back;
+    ui.sheet = null;
+    render();
+    if (back) { data.lastCo = id; openItemSheet(null); }
+  },
+  'delete-co': () => {
+    const d = ui.sheet.draft;
+    const open = data.items.filter((i) => i.companyId === d.id && !i.done).length;
+    const msg = 'Delete ' + d.name + '?' + (open ? ' Its ' + plural(open, 'unfinished item') + ' will be deleted.' : '') + ' Finished work stays in your monthly history.';
+    if (!confirm(msg)) return;
+    data.items.forEach((i) => { if (i.companyId === d.id) snap(i); });
+    data.companies = data.companies.filter((c) => c.id !== d.id);
+    data.items = data.items.filter((i) => i.companyId !== d.id || i.done);
+    save(); ui.sheet = null; render();
+  },
+  'export': async () => {
+    const name = 'wwa-backup-' + todayKey() + '.json';
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const file = new File([blob], name, { type: 'application/json' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: name }); return; } catch (e) { if (e.name === 'AbortError') return; }
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  },
+  'import': () => document.getElementById('import-file').click()
+};
+
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  const fn = actions[el.dataset.act];
+  if (fn) fn(el, e);
+});
+document.addEventListener('input', (e) => {
+  const f = e.target.dataset && e.target.dataset.field;
+  if (f && ui.sheet) { ui.sheet.draft[f] = e.target.value; if (ui.sheet.error) { ui.sheet.error = null; const er = document.querySelector('.err'); if (er) er.remove(); } }
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && ui.sheet) { ui.sheet = null; renderSheet(); }
+  if (e.key === 'Enter' && ui.sheet && e.target.matches('input[type=text]')) { e.preventDefault(); actions[ui.sheet.type === 'item' ? 'save-item' : 'save-co'](); }
+});
+document.getElementById('import-file').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (!d || !Array.isArray(d.companies) || !Array.isArray(d.items)) throw new Error('bad');
+    if (!confirm('Replace everything in the app with this backup? It has ' + d.companies.length + ' companies and ' + d.items.length + ' items.')) return;
+    data = d; save(); render();
+  } catch (err) {
+    alert('This file is not a WWA backup. Choose a file made with Export backup.');
+  }
+});
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !ui.sheet) render(); });
+
+document.addEventListener('touchstart', () => {}, { passive: true }); // lets :active press effects work on iPhone
+data.items.forEach(snap); save();
+render();
+checkMonthRecap();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
