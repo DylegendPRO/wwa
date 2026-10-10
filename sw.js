@@ -1,6 +1,6 @@
 // Keeps the app working offline. Cached files are served instantly and
 // refreshed in the background, so a new upload shows up on the next launch.
-const CACHE = 'wwa-v9';
+const CACHE = 'wwa-v10';
 const SHELL = [
   './',
   './index.html',
