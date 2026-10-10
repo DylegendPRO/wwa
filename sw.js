@@ -1,13 +1,13 @@
 // Keeps the app working offline. Cached files are served instantly and
 // refreshed in the background, so a new upload shows up on the next launch.
-const CACHE = 'wwa-v8';
+const CACHE = 'wwa-v9';
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/apple-touch-icon.png'
+  './icon-192.png',
+  './icon-512.png',
+  './apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (e) => {
