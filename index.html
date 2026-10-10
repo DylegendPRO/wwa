@@ -211,6 +211,42 @@ html.home-mode,body.home-mode{background:#FFE6F0}
 .confetti.heart{font-size:22px;line-height:1}
 @keyframes fall{to{transform:translateY(110vh) rotate(var(--spin))}}
 @keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.18)}30%{transform:scale(1)}45%{transform:scale(1.12)}}
+/* ---------- Company boxes slider ---------- */
+.slider-wrap{margin-top:20px}
+.slider-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 2px 12px}
+.slider-bar h2{margin:0;font-family:'Chewy','Plus Jakarta Sans',cursive;font-weight:400;font-size:25px;color:#C2185B;letter-spacing:.02em}
+.slider-nav{display:flex;align-items:center;gap:8px}
+.arrow{width:44px;height:44px;border-radius:999px;border:none;background:#E0337E;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 0 #A3155A;transition:transform .15s,opacity .2s}
+.arrow:active{transform:translateY(2px) scale(.95)}
+.arrow:disabled{opacity:.35;box-shadow:none}
+.pager{font-size:13px;font-weight:800;color:#C2185B;min-width:44px;text-align:center}
+.slider{overflow:hidden;margin:0 -16px;padding:4px 0 10px;touch-action:pan-y;transition:height .45s ease;box-sizing:content-box}
+.track{display:flex;align-items:flex-start;transition:transform .6s cubic-bezier(.34,1.35,.5,1);will-change:transform}
+.track.still{transition:none}
+.slide{flex:0 0 100%;padding:0 16px;display:flex;flex-direction:column;gap:16px;transition:transform .5s ease,opacity .5s ease}
+.slide.off{transform:scale(.9) rotate(-1.5deg);opacity:.35}
+.slide.off.right{transform:scale(.9) rotate(1.5deg)}
+.slide.enter .cobox{animation:boxIn .6s cubic-bezier(.2,1.4,.4,1) backwards}
+.slide.enter .cobox:nth-child(2){animation-delay:.08s}
+@keyframes boxIn{from{transform:translateY(18px) scale(.94);opacity:0}}
+.dots-nav{display:flex;justify-content:center;gap:6px;margin-top:4px}
+.dots-nav button{width:10px;height:10px;border-radius:999px;border:none;padding:0;background:#FFC2DA;transition:width .3s,background .3s;position:relative}
+.dots-nav button::after{content:'';position:absolute;inset:-12px -6px}
+.dots-nav button.on{width:26px;background:#E0337E}
+.cobox{background:#fff;border-radius:26px;overflow:hidden;box-shadow:0 5px 0 #FFC9DE}
+.cobox-head{padding:16px 18px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cobox-head h3{margin:0;font-family:'Chewy','Plus Jakarta Sans',cursive;font-weight:400;font-size:26px;letter-spacing:.02em;line-height:1.1;overflow-wrap:anywhere}
+.cobox-count{font-size:13px;font-weight:800;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.85);white-space:nowrap}
+.cobox-prog{height:6px;background:rgba(255,255,255,.4)}
+.cobox-prog i{display:block;height:100%;background:rgba(255,255,255,.95);transition:width .4s}
+.cobox-body{padding:12px 12px 14px;display:flex;flex-direction:column;gap:6px}
+.sub-h{display:flex;justify-content:space-between;align-items:baseline;padding:6px 8px 2px;font-family:'Chewy','Plus Jakarta Sans',cursive;font-size:19px;color:#C2185B;letter-spacing:.02em}
+.sub-h span{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:800}
+.cobox .row{box-shadow:none;background:#FFF4F8;border-radius:16px}
+.sub-empty{font-size:13px;font-weight:600;color:#9C3D6A;padding:4px 8px 6px}
+.row-desc{font-size:13px;font-weight:500;color:#7A3A5B;line-height:1.4;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.row.done .row-desc{color:#C77A9E}
+.input.area{height:auto;min-height:100px;padding:14px 16px;resize:none;line-height:1.45;display:block;font-weight:500}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -418,19 +454,86 @@ function viewHome() {
 }
 
 /* ---------- Views ---------- */
-function rowHtml(it) {
+function rowHtml(it, noTag) {
   const c = coOf(it);
   return '<div class="row' + (it.done ? ' done' : '') + '" style="--c:' + c.color + ';--ck:' + tick(c.color) + '">' +
     '<button class="check' + (it.done ? ' on' : '') + '" data-act="toggle" data-id="' + it.id + '" aria-pressed="' + it.done + '" aria-label="' + (it.done ? 'Mark not done: ' : 'Mark done: ') + esc(it.title) + '"><span>' + (it.done ? CHECK : '') + '</span></button>' +
     '<button class="row-main" data-act="edit" data-id="' + it.id + '"><span class="row-title">' + esc(it.title) + '</span>' +
-    '<span class="meta"><span class="tag" style="background:' + tint(c.color) + ';color:' + ink(c.color) + '">' + esc(c.name) + '</span>' +
-    (it.time ? '<span class="time">' + it.time + '</span>' : '') + '</span></button></div>';
+    (it.desc ? '<span class="row-desc">' + esc(it.desc) + '</span>' : '') +
+    ((!noTag || it.time) ? '<span class="meta">' + (noTag ? '' : '<span class="tag" style="background:' + tint(c.color) + ';color:' + ink(c.color) + '">' + esc(c.name) + '</span>') +
+    (it.time ? '<span class="time">' + it.time + '</span>' : '') + '</span>' : '') + '</button></div>';
 }
 
 function sectionHtml(title, list, emptyText) {
   const d = list.filter((i) => i.done).length;
   return '<section class="section"><div class="sec-head"><h2>' + title + '</h2>' + (list.length ? '<span>' + d + ' / ' + list.length + '</span>' : '') + '</div>' +
     (list.length ? list.map(rowHtml).join('') : '<div class="empty small">' + emptyText + '</div>') + '</section>';
+}
+
+function companyBox(c, list) {
+  const done = list.filter((i) => i.done).length;
+  const fg = tick(c.color);
+  const part = (kind, label) => {
+    const mine = list.filter((i) => i.kind === kind);
+    const d = mine.filter((i) => i.done).length;
+    return '<div class="sub-h">' + label + (mine.length ? '<span>' + d + ' / ' + mine.length + '</span>' : '') + '</div>' +
+      (mine.length ? mine.map((i) => rowHtml(i, true)).join('') : '<div class="sub-empty">No ' + label.toLowerCase() + ' today</div>');
+  };
+  return '<article class="cobox">' +
+    '<div style="background:' + c.color + '"><div class="cobox-head"><h3 style="color:' + fg + '">' + esc(c.name) + '</h3><span class="cobox-count" style="color:' + ink(c.color) + '">' + done + ' of ' + list.length + ' done</span></div>' +
+    '<div class="cobox-prog"><i style="width:' + Math.round(done / list.length * 100) + '%"></i></div></div>' +
+    '<div class="cobox-body">' + part('task', 'Tasks') + part('post', 'Posts') + '</div></article>';
+}
+
+// Groups the day's items by company, 2 company boxes per slide.
+function companySlider(list) {
+  const groups = [];
+  data.companies.forEach((c) => { const mine = list.filter((i) => i.companyId === c.id); if (mine.length) groups.push([c, mine]); });
+  const orphan = {};
+  list.filter((i) => !data.companies.some((c) => c.id === i.companyId)).forEach((i) => { const c = coOf(i), k = c.name + c.color; (orphan[k] = orphan[k] || [c, []])[1].push(i); });
+  Object.values(orphan).forEach((g) => groups.push(g));
+  const pages = [];
+  for (let i = 0; i < groups.length; i += 2) pages.push(groups.slice(i, i + 2));
+  ui.pages = pages.length;
+  ui.page = Math.min(ui.page || 0, pages.length - 1);
+  const multi = pages.length > 1;
+  const slides = pages.map((pg, i) => '<div class="slide' + (i === ui.page ? '' : ' off' + (i > ui.page ? ' right' : '')) + '" aria-hidden="' + (i !== ui.page) + '">' + pg.map((g) => companyBox(g[0], g[1])).join('') + '</div>').join('');
+  return '<section class="slider-wrap" aria-roledescription="carousel" aria-label="Companies today">' +
+    '<div class="slider-bar"><h2>By company</h2>' +
+    (multi ? '<div class="slider-nav"><button class="arrow" data-act="slide" data-n="-1" aria-label="Previous companies"' + (ui.page === 0 ? ' disabled' : '') + '>' + LEFT.replace('currentColor', '#fff') + '</button><span class="pager" id="pager">' + (ui.page + 1) + ' / ' + pages.length + '</span><button class="arrow" data-act="slide" data-n="1" aria-label="Next companies"' + (ui.page === pages.length - 1 ? ' disabled' : '') + '>' + RIGHT.replace('currentColor', '#fff') + '</button></div>' : '') +
+    '</div><div class="slider" id="slider"><div class="track still" id="track" style="transform:translateX(' + (-ui.page * 100) + '%)">' + slides + '</div></div>' +
+    (multi ? '<div class="dots-nav">' + pages.map((_, i) => '<button class="' + (i === ui.page ? 'on' : '') + '" data-act="slide-to" data-n="' + i + '" aria-label="Show companies page ' + (i + 1) + '"></button>').join('') + '</div>' : '') +
+    '</section>';
+}
+
+// Fit the slider to the visible slide so shorter pages don't leave empty space
+function fitSlider() {
+  const sl = document.getElementById('slider');
+  if (!sl) return;
+  const a = sl.querySelectorAll('.slide')[ui.page || 0];
+  if (a) sl.style.height = a.offsetHeight + 'px';
+}
+
+function goSlide(n) {
+  const track = document.getElementById('track');
+  if (!track) return;
+  ui.page = Math.max(0, Math.min((ui.pages || 1) - 1, n));
+  track.classList.remove('still');
+  track.style.transform = 'translateX(' + (-ui.page * 100) + '%)';
+  track.querySelectorAll('.slide').forEach((sl, i) => {
+    const on = i === ui.page;
+    sl.classList.toggle('off', !on);
+    sl.classList.toggle('right', i > ui.page);
+    sl.setAttribute('aria-hidden', String(!on));
+    sl.classList.remove('enter');
+    if (on) { void sl.offsetWidth; sl.classList.add('enter'); }
+  });
+  document.querySelectorAll('.dots-nav button').forEach((b, i) => b.classList.toggle('on', i === ui.page));
+  const pager = document.getElementById('pager');
+  if (pager) pager.textContent = (ui.page + 1) + ' / ' + ui.pages;
+  const arrows = document.querySelectorAll('.arrow');
+  if (arrows.length === 2) { arrows[0].disabled = ui.page === 0; arrows[1].disabled = ui.page === ui.pages - 1; }
+  fitSlider();
 }
 
 function viewToday() {
@@ -452,8 +555,7 @@ function viewToday() {
   } else if (!list.length) {
     body = '<div class="section"><div class="empty">Nothing planned for this day. Tap + to add a task or a post.</div></div>';
   } else {
-    body = sectionHtml('Tasks', list.filter((i) => i.kind === 'task'), 'No tasks this day.') +
-           sectionHtml('Posts', list.filter((i) => i.kind === 'post'), 'No posts this day.');
+    body = companySlider(list);
   }
 
   return '<div class="screen">' +
@@ -533,6 +635,7 @@ function sheetItem() {
   return sheetWrap(editing ? 'Edit ' + (isTask ? 'task' : 'post') : 'New item',
     '<div class="seg" role="group" aria-label="Type"><button class="' + (isTask ? 'on' : '') + '" data-act="kind" data-kind="task" aria-pressed="' + isTask + '">Task</button><button class="' + (!isTask ? 'on' : '') + '" data-act="kind" data-kind="post" aria-pressed="' + !isTask + '">Post</button></div>' +
     '<div class="field"><label class="flabel" for="f-title">Title</label><input class="input" id="f-title" data-field="title" type="text" autocomplete="off" placeholder="' + (isTask ? 'e.g. Review product photos' : 'e.g. Instagram reel') + '" value="' + esc(d.title) + '">' + (ui.sheet.error ? '<p class="err">' + ui.sheet.error + '</p>' : '') + '</div>' +
+    '<div class="field"><label class="flabel" for="f-desc">Details (optional)</label><textarea class="input area" id="f-desc" data-field="desc" rows="3" placeholder="' + (isTask ? 'e.g. Use the photos from Tuesday, send to Ana before 5' : 'e.g. Caption idea, hashtags, which photo to use') + '">' + esc(d.desc || '') + '</textarea></div>' +
     '<div class="field"><span class="flabel">Company</span><div class="two">' + picks + '</div></div>' +
     '<div class="two"><div class="field"><label class="flabel" for="f-date">Date</label><input class="input" id="f-date" data-field="date" type="date" value="' + d.date + '"></div>' +
     '<div class="field"><label class="flabel" for="f-time">Time (optional)</label><input class="input" id="f-time" data-field="time" type="time" value="' + (d.time || '') + '"></div></div>' +
@@ -562,6 +665,7 @@ function render() {
     if (on) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
   });
   document.querySelector('.fab').hidden = ui.view === 'companies';
+  fitSlider();
   renderSheet();
 }
 function renderSheet() {
@@ -671,9 +775,11 @@ const actions = {
   'add': () => openItemSheet(null),
   'play': () => { ui.rolls = 0; ui.view = 'today'; ui.sel = todayKey(); render(); window.scrollTo(0, 0); },
   'roll': () => rollDice(),
-  'week': (el) => { ui.sel = addDays(ui.sel, Number(el.dataset.n)); render(); },
-  'pick-day': (el) => { ui.sel = el.dataset.key; render(); },
-  'go-today': () => { ui.sel = todayKey(); render(); },
+  'slide': (el) => goSlide((ui.page || 0) + Number(el.dataset.n)),
+  'slide-to': (el) => goSlide(Number(el.dataset.n)),
+  'week': (el) => { ui.page = 0; ui.sel = addDays(ui.sel, Number(el.dataset.n)); render(); },
+  'pick-day': (el) => { ui.page = 0; ui.sel = el.dataset.key; render(); },
+  'go-today': () => { ui.page = 0; ui.sel = todayKey(); render(); },
   'month': (el) => { const [y, m] = ui.month.split('-').map(Number); const d = new Date(y, m - 1 + Number(el.dataset.n), 1); ui.month = d.getFullYear() + '-' + pad(d.getMonth() + 1); render(); },
   'open-day': () => { ui.view = 'today'; render(); window.scrollTo(0, 0); },
   'close': () => { ui.sheet = null; renderSheet(); },
@@ -683,10 +789,11 @@ const actions = {
   'save-item': () => {
     const d = ui.sheet.draft;
     d.title = (d.title || '').trim();
+    d.desc = (d.desc || '').trim();
     if (!d.title) { ui.sheet.error = 'Add a title first.'; renderSheet(); document.getElementById('f-title').focus(); return; }
     if (!d.date) d.date = ui.sel;
     if (d.id) { const i = data.items.findIndex((x) => x.id === d.id); if (i > -1) data.items[i] = { ...data.items[i], ...d }; }
-    else data.items.push({ id: uid(), kind: d.kind, title: d.title, companyId: d.companyId, date: d.date, time: d.time || '', done: false });
+    else data.items.push({ id: uid(), kind: d.kind, title: d.title, desc: (d.desc || '').trim(), companyId: d.companyId, date: d.date, time: d.time || '', done: false });
     data.items.forEach((i) => { if (i.companyId === d.companyId) snap(i); });
     data.lastCo = d.companyId;
     save(); ui.sel = d.date; ui.sheet = null; render();
@@ -767,10 +874,37 @@ document.getElementById('import-file').addEventListener('change', async (e) => {
 });
 document.addEventListener('visibilitychange', () => { if (!document.hidden && !ui.sheet) render(); });
 
-document.addEventListener('touchstart', () => {}, { passive: true }); // lets :active press effects work on iPhone
+document.addEventListener('touchstart', () => {}, { passive: true });
+// Swipe the company boxes left/right
+let sw = null;
+document.addEventListener('touchstart', (e) => {
+  const sl = e.target.closest('#slider');
+  if (!sl || (ui.pages || 1) < 2) return;
+  sw = { x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0, lock: null, w: sl.offsetWidth };
+}, { passive: true });
+document.addEventListener('touchmove', (e) => {
+  if (!sw) return;
+  const dx = e.touches[0].clientX - sw.x, dy = e.touches[0].clientY - sw.y;
+  if (sw.lock === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) sw.lock = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+  if (sw.lock !== 'x') return;
+  sw.dx = dx;
+  const edge = (ui.page === 0 && dx > 0) || (ui.page === ui.pages - 1 && dx < 0);
+  const track = document.getElementById('track');
+  track.classList.add('still');
+  track.style.transform = 'translateX(calc(' + (-ui.page * 100) + '% + ' + (edge ? dx / 3 : dx) + 'px))';
+}, { passive: true });
+document.addEventListener('touchend', () => {
+  if (!sw) return;
+  const s0 = sw; sw = null;
+  if (s0.lock !== 'x') return;
+  const dir = s0.dx < -50 ? 1 : s0.dx > 50 ? -1 : 0;
+  goSlide(ui.page + dir);
+}); // lets :active press effects work on iPhone
 data.items.forEach(snap); save();
 render();
 checkMonthRecap();
+window.addEventListener('resize', fitSlider);
+if (document.fonts) document.fonts.ready.then(fitSlider);
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>
